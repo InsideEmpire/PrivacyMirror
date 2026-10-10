@@ -1,5 +1,6 @@
 import { ArrowRight, Check } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import type { AuthorizedSubject } from '../App.tsx'
 import { demo } from '../data/demo.ts'
 
 const bio = demo.sources.find((source) => source.id === 'src-bio')
@@ -7,14 +8,7 @@ const eventPost = demo.sources.find((source) => source.id === 'src-event')
 const note = demo.sources.find((source) => source.id === 'src-note')
 const photoSource = demo.sources.find((source) => source.id === 'src-photo')
 
-const script = [
-  { key: 'name', text: demo.persona },
-  { key: 'bio', text: bio?.text ?? '' },
-  { key: 'event', text: eventPost?.text ?? '' },
-  { key: 'note', text: note?.text ?? '' },
-] as const
-
-type FieldKey = (typeof script)[number]['key']
+type FieldKey = 'name' | 'bio' | 'event' | 'note'
 type Phase = 'idle' | 'typing' | 'photo' | 'ready' | 'running'
 
 const runSteps = ['Language', 'Vision', 'Metadata', 'Link']
@@ -63,8 +57,10 @@ function Field({
   )
 }
 
-export function Story({ onOpen }: { onOpen: () => void }) {
+export function Story({ onOpen }: { onOpen: (subject: AuthorizedSubject) => void }) {
   const [consented, setConsented] = useState(false)
+  const [subjectName, setSubjectName] = useState(demo.persona)
+  const [birthDate, setBirthDate] = useState(demo.birthDate)
   const [phase, setPhase] = useState<Phase>('idle')
   const [values, setValues] = useState<Record<FieldKey, string>>({ name: '', bio: '', event: '', note: '' })
   const [activeKey, setActiveKey] = useState<FieldKey | null>(null)
@@ -74,6 +70,12 @@ export function Story({ onOpen }: { onOpen: () => void }) {
   useEffect(() => {
     if (phase !== 'typing') return
     let cancelled = false
+    const script = [
+      { key: 'name', text: subjectName },
+      { key: 'bio', text: bio?.text ?? '' },
+      { key: 'event', text: eventPost?.text ?? '' },
+      { key: 'note', text: note?.text ?? '' },
+    ] as const
     async function typeSources() {
       for (const item of script) {
         setActiveKey(item.key)
@@ -92,7 +94,7 @@ export function Story({ onOpen }: { onOpen: () => void }) {
     return () => {
       cancelled = true
     }
-  }, [phase])
+  }, [phase, subjectName])
 
   useEffect(() => {
     if (phase !== 'photo') return
@@ -110,9 +112,9 @@ export function Story({ onOpen }: { onOpen: () => void }) {
       const timer = window.setTimeout(() => setStep((current) => current + 1), 520)
       return () => window.clearTimeout(timer)
     }
-    const timer = window.setTimeout(onOpen, 420)
+    const timer = window.setTimeout(() => onOpen({ name: subjectName.trim(), birthDate }), 420)
     return () => window.clearTimeout(timer)
-  }, [onOpen, phase, step])
+  }, [birthDate, onOpen, phase, step, subjectName])
 
   const busy = phase === 'typing' || phase === 'photo' || phase === 'running'
 
@@ -130,6 +132,27 @@ export function Story({ onOpen }: { onOpen: () => void }) {
           <p className="mt-3 text-sm leading-relaxed text-muted">
             Language, the picture, and the file tag are typed in as separate sources. The read only starts after they are on the page.
           </p>
+          <div className="mt-5 space-y-3">
+            <label className="block">
+              <span className="text-[11px] font-semibold tracking-[0.14em] text-accent uppercase">Authorized name</span>
+              <input
+                value={subjectName}
+                onChange={(event) => setSubjectName(event.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-line bg-card px-3 py-2.5 text-sm text-ink outline-none focus:border-accent"
+                autoComplete="name"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[11px] font-semibold tracking-[0.14em] text-accent uppercase">Birth date</span>
+              <input
+                type="date"
+                value={birthDate}
+                onChange={(event) => setBirthDate(event.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-line bg-card px-3 py-2.5 text-sm text-ink outline-none focus:border-accent"
+                autoComplete="bday"
+              />
+            </label>
+          </div>
           <label className="mt-6 flex cursor-pointer items-start gap-3 text-sm text-ink">
             <input
               type="checkbox"
@@ -141,7 +164,7 @@ export function Story({ onOpen }: { onOpen: () => void }) {
           </label>
           <button
             type="button"
-            disabled={!consented || busy || phase === 'ready'}
+            disabled={!consented || !subjectName.trim() || !birthDate || busy || phase === 'ready'}
             onClick={() => setPhase('typing')}
             className="mt-5 w-full rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-line disabled:text-muted"
           >

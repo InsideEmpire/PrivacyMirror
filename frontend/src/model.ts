@@ -64,6 +64,7 @@ export interface DemoEdge {
 
 export interface DemoData {
   persona: string
+  birthDate: string
   role: string
   sources: DemoSource[]
   claims: DemoClaim[]

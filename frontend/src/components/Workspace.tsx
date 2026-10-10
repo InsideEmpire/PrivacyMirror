@@ -1,5 +1,6 @@
 import { RotateCcw } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import type { AuthorizedSubject } from '../App.tsx'
 import { demo } from '../data/demo.ts'
 import { MITIGATIONS, resolveScenario, type MitigationId } from '../model.ts'
 import { ExposureGraph } from './ExposureGraph.tsx'
@@ -17,7 +18,7 @@ const exposureClass = {
   reduced: 'text-ok',
 } as const
 
-export function Workspace({ onReset }: { onReset: () => void }) {
+export function Workspace({ subject, onReset }: { subject: AuthorizedSubject; onReset: () => void }) {
   const [enabled, setEnabled] = useState<MitigationId[]>([])
   const [pickedId, setPickedId] = useState<string | null>(null)
   const [stage, setStage] = useState(initialStage)
@@ -40,7 +41,7 @@ export function Workspace({ onReset }: { onReset: () => void }) {
     <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-3 sm:px-5">
       <header className="flex items-start justify-between gap-4">
         <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
-          PrivacyMirror · Case 014 · {demo.persona}
+          PrivacyMirror · Case 014 · {subject.name}
         </p>
         <button
           type="button"
@@ -55,6 +56,9 @@ export function Workspace({ onReset }: { onReset: () => void }) {
       <h1 className="mt-3 max-w-4xl font-serif text-3xl leading-tight text-ink sm:text-4xl" aria-live="polite">
         {scenario.exposure.note}
       </h1>
+      <p className="mt-2 text-sm text-muted">
+        Authorized subject · birth date {subject.birthDate} · synthetic sources only · no external lookup
+      </p>
 
       <section className="mt-4 flex flex-wrap items-center gap-2">
         {MITIGATIONS.map((mitigation) => {
