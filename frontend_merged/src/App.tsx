@@ -26,6 +26,7 @@ import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import './App.css'
 import { analyzeText, SAMPLE_TEXT, type AnalysisReport, type ExposureFinding, type RiskLevel } from './analyze.ts'
 import { MirrorStage } from './components/MirrorStage.tsx'
+import { RepairLab } from './components/RepairLab.tsx'
 import { PERSONAS } from './data/personas.ts'
 
 export interface AuthorizedSubject {
@@ -229,6 +230,7 @@ export default function App() {
           </section>
           <MirrorStage report={report} visibleFindings={visibleFindings} selectedFinding={selectedFinding} onSelect={(id) => { setSelectedFinding(id); setView('overview') }} activeMitigations={activeMitigations} onToggle={toggleMitigation} onCompare={() => setActiveMitigations(activeMitigations.length ? [] : [...new Set(report.findings.flatMap((finding) => finding.mitigation ? [finding.mitigation] : []))])} presenting={presenting} onPresent={() => setPresenting((current) => !current)} />
 
+          <RepairLab key={personaId ?? 'custom'} text={text} imageCount={files.filter(({ file }) => file.type.startsWith('image/')).length} onApply={(nextText) => { setText(nextText); setReport(analyzeText(nextText, report.isDemo, files.filter(({ file }) => file.type.startsWith('image/')).length)); setActiveMitigations([]); setSelectedFinding(null); setView('overview'); }} />
           <section className="metric-strip" aria-label="Analysis summary">
             <div className="metric-cell"><span className="metric-icon teal"><FileText size={17} /></span><div><small>Sources added</small><strong>{report.sourceCount.toString().padStart(2, '0')} <em>items</em></strong></div></div>
             <div className="metric-cell"><span className="metric-icon blue"><Building2 size={17} /></span><div><small>Place mentions</small><strong>{report.locations.length.toString().padStart(2, '0')} <em>places</em></strong></div></div>
