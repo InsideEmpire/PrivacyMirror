@@ -26,6 +26,7 @@ import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import './App.css'
 import { analyzeText, SAMPLE_TEXT, type AnalysisReport, type ExposureFinding, type RiskLevel } from './analyze.ts'
 import { MirrorStage } from './components/MirrorStage.tsx'
+import { AiReview } from './components/AiReview.tsx'
 import { RepairLab } from './components/RepairLab.tsx'
 import { PERSONAS } from './data/personas.ts'
 
@@ -202,7 +203,7 @@ export default function App() {
 
         <div className="sidebar-session">
           <div className="session-icon"><LockKeyhole size={16} /></div>
-          <div><strong>Authorized content only</strong><p>Files stay in this browser session</p></div>
+          <div><strong>Authorized content only</strong><p>AI review sends authorized text only</p></div>
           <BadgeCheck className="session-check" size={15} />
         </div>
         <div className="sidebar-manifesto"><span>THE PRIVACY PARADOX</span><p>Small traces.<br />Bigger picture.</p><small>Understand what your content reveals when the pieces come together.</small></div>
@@ -215,7 +216,7 @@ export default function App() {
       <main className="main-area" id="workspace">
         <header className="topbar">
           <div className="breadcrumb"><span>Personal workspace</span><span className="breadcrumb-slash">/</span><strong>{viewLabels[view]}</strong></div>
-          <div className="topbar-right"><span className="local-status"><i />Local rules preview</span><button type="button" className="icon-button" title="Privacy and security" onClick={() => announce('Content stays on this page; no AI backend is configured.')}><LockKeyhole size={16} /></button><span className="top-avatar">P</span></div>
+          <div className="topbar-right"><span className="local-status"><i />Local rules preview</span><button type="button" className="icon-button" title="Privacy and security" onClick={() => announce('Local rules run here. Live AI review sends your text to Google only when requested.')}><LockKeyhole size={16} /></button><span className="top-avatar">P</span></div>
         </header>
 
         <div className="page-content">
@@ -228,20 +229,9 @@ export default function App() {
             <div className="persona-heading"><span>EXPLORE THE HUMAN SIDE</span><small>4 fictional cases · Real extraction rules</small></div>
             <div className="persona-cards">{PERSONAS.map((persona, index) => <button type="button" key={persona.id} disabled={isAnalyzing} className={`persona-card ${persona.color} ${personaId === persona.id ? 'chosen' : ''}`} aria-pressed={personaId === persona.id} onClick={() => loadDemo(persona)}><span className="persona-top"><span className="persona-avatar">{persona.initials}</span><span className="persona-case">CASE / 0{index + 1}</span>{personaId === persona.id ? <Check size={14} /> : <ArrowRight size={14} />}</span><strong>{persona.name}</strong><span className="persona-role">{persona.role}</span><p>{persona.description}</p><span className="persona-tag">{persona.tag}</span></button>)}</div>
           </section>
-          <MirrorStage report={report} visibleFindings={visibleFindings} selectedFinding={selectedFinding} onSelect={(id) => { setSelectedFinding(id); setView('overview') }} activeMitigations={activeMitigations} onToggle={toggleMitigation} onCompare={() => setActiveMitigations(activeMitigations.length ? [] : [...new Set(report.findings.flatMap((finding) => finding.mitigation ? [finding.mitigation] : []))])} presenting={presenting} onPresent={() => setPresenting((current) => !current)} />
 
-          <RepairLab key={personaId ?? 'custom'} text={text} imageCount={files.filter(({ file }) => file.type.startsWith('image/')).length} onApply={(nextText) => { setText(nextText); setReport(analyzeText(nextText, report.isDemo, files.filter(({ file }) => file.type.startsWith('image/')).length)); setActiveMitigations([]); setSelectedFinding(null); setView('overview'); }} />
-          <section className="metric-strip" aria-label="Analysis summary">
-            <div className="metric-cell"><span className="metric-icon teal"><FileText size={17} /></span><div><small>Sources added</small><strong>{report.sourceCount.toString().padStart(2, '0')} <em>items</em></strong></div></div>
-            <div className="metric-cell"><span className="metric-icon blue"><Building2 size={17} /></span><div><small>Place mentions</small><strong>{report.locations.length.toString().padStart(2, '0')} <em>places</em></strong></div></div>
-            <div className="metric-cell"><span className={`metric-icon ${overallLevel === 'high' ? 'coral' : overallLevel === 'medium' ? 'amber' : 'teal'}`}><ShieldAlert size={17} /></span><div><small>Open findings</small><strong>{visibleFindings.length.toString().padStart(2, '0')} <em>items</em></strong></div></div>
-            <div className="metric-note"><span className="pulse-dot" />{report.isDemo ? 'Sample data is ready' : 'Local analysis complete'}<span className="metric-note-divider" />Only your supplied content</div>
-          </section>
-
-          <div className="workbench-grid">
-            <div className="primary-column">
-              <section className="input-panel panel">
-                <div className="panel-heading input-heading"><div className="panel-title-group"><span className="step-index">01</span><div><h2>Add your material</h2><p>Text gets a local rule-based preview. Images are added as sources only.</p></div></div><span className="secure-label"><LockKeyhole size={13} />Private workspace</span></div>
+          <div className="material-first"><section className="input-panel panel">
+                <div className="panel-heading input-heading"><div className="panel-title-group"><span className="step-index">01</span><div><h2>Add your material</h2><p>Paste or edit your text, then run the Gemini review below. Images are previewed only.</p></div></div><span className="secure-label"><LockKeyhole size={13} />Private workspace</span></div>
                 <div className="input-tabs"><span className="input-tab active"><FileText size={14} />Text content</span><button type="button" className="input-tab" onClick={() => fileInput.current?.click()}><ImagePlus size={14} />Images / files</button><span className="input-hint">Paste · .md · .txt · .csv · images</span></div>
                 <div className="subject-fields">
                   <label><span>Authorized name</span><input value={subjectName} onChange={(event) => setSubjectName(event.target.value)} autoComplete="name" placeholder="Your name or synthetic subject" /></label>
@@ -256,9 +246,20 @@ export default function App() {
                   <span className="file-name">{file.name}<small>{url ? 'Awaiting visual analysis' : `${Math.max(1, Math.round(file.size / 1024))} KB · Text loaded`}</small></span><button type="button" aria-label={`Remove ${file.name}`} onClick={() => removeFile(file)}><X size={14} /></button>
                 </div>)}</div>}
                 <div className={`consent-row ${consentError ? 'needs-consent' : ''}`}><label><input type="checkbox" checked={consented} onChange={(event) => { setConsented(event.target.checked); setConsentError(false) }} /><span className="custom-check"><Check size={12} /></span><span>I own this content or have permission to analyze it.</span></label><button type="button" className="text-button" onClick={() => announce('Do not upload another person’s private data, credentials, or content without authorization.')} title="Authorization details"><CircleHelp size={14} /></button></div>
-                <div className="compose-footer"><span><span className="privacy-led" />Processed locally · never uploaded</span><button type="button" className="analyze-button" onClick={runAnalysis} disabled={isAnalyzing}>{isAnalyzing ? <><span className="spinner" />Reviewing clues</> : <><Sparkles size={16} />Generate analysis<ArrowRight size={15} /></>}</button></div>
-              </section>
+                <div className="compose-footer"><span><span className="privacy-led" />Optional quick check · Stays on this device</span><button type="button" className="analyze-button" onClick={runAnalysis} disabled={isAnalyzing}>{isAnalyzing ? <><span className="spinner" />Reviewing clues</> : <><Sparkles size={16} />Run local check<ArrowRight size={15} /></>}</button></div>
+              </section></div>
+          <AiReview key={'ai-' + (personaId ?? 'custom')} text={text} onApply={(nextText) => { setText(nextText); setReport(analyzeText(nextText, report.isDemo, files.filter(({ file }) => file.type.startsWith('image/')).length)); setActiveMitigations([]); setSelectedFinding(null); }} />
+          <MirrorStage report={report} visibleFindings={visibleFindings} selectedFinding={selectedFinding} onSelect={(id) => { setSelectedFinding(id); setView('overview') }} activeMitigations={activeMitigations} onToggle={toggleMitigation} onCompare={() => setActiveMitigations(activeMitigations.length ? [] : [...new Set(report.findings.flatMap((finding) => finding.mitigation ? [finding.mitigation] : []))])} presenting={presenting} onPresent={() => setPresenting((current) => !current)} />
+          <RepairLab key={personaId ?? 'custom'} text={text} imageCount={files.filter(({ file }) => file.type.startsWith('image/')).length} onApply={(nextText) => { setText(nextText); setReport(analyzeText(nextText, report.isDemo, files.filter(({ file }) => file.type.startsWith('image/')).length)); setActiveMitigations([]); setSelectedFinding(null); setView('overview'); }} />
+          <section className="metric-strip" aria-label="Analysis summary">
+            <div className="metric-cell"><span className="metric-icon teal"><FileText size={17} /></span><div><small>Sources added</small><strong>{report.sourceCount.toString().padStart(2, '0')} <em>items</em></strong></div></div>
+            <div className="metric-cell"><span className="metric-icon blue"><Building2 size={17} /></span><div><small>Place mentions</small><strong>{report.locations.length.toString().padStart(2, '0')} <em>places</em></strong></div></div>
+            <div className="metric-cell"><span className={`metric-icon ${overallLevel === 'high' ? 'coral' : overallLevel === 'medium' ? 'amber' : 'teal'}`}><ShieldAlert size={17} /></span><div><small>Open findings</small><strong>{visibleFindings.length.toString().padStart(2, '0')} <em>items</em></strong></div></div>
+            <div className="metric-note"><span className="pulse-dot" />{report.isDemo ? 'Sample data is ready' : 'Local analysis complete'}<span className="metric-note-divider" />Only your supplied content</div>
+          </section>
 
+          <div className="workbench-grid">
+            <div className="primary-column">
               <section className="results-panel panel">
                 <div className="results-header"><div className="panel-title-group"><span className="step-index">02</span><div><h2>Analysis results</h2><p>Each finding links to its source text; routes are possible scenarios only.</p></div></div><div className="view-switch" role="tablist" aria-label="Analysis views">{(['overview', 'evidence', 'itinerary'] as WorkspaceView[]).map((item) => <button key={item} type="button" role="tab" aria-selected={view === item} className={view === item ? 'selected' : ''} onClick={() => setView(item)}>{viewLabels[item]}</button>)}</div></div>
                 {view === 'overview' && <Overview report={report} visibleFindings={visibleFindings} onSelect={setSelectedFinding} selectedFinding={selectedFinding} onEvidence={() => setView('evidence')} />}

@@ -542,3 +542,7 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+.material-first { margin-top: 24px; }
+.material-first .input-panel textarea { min-height: 180px; }
+.material-first .compose-footer .analyze-button { background: #edf3ef; color: #315c50; box-shadow: none; border: 1px solid #ceded5; }
+@media (max-width: 760px) { .material-first .compose-footer { flex-wrap: wrap; gap: 12px; } .material-first .input-panel textarea { min-height: 210px; } }
