@@ -26,6 +26,7 @@ import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import './App.css'
 import { analyzeText, SAMPLE_TEXT, type AnalysisReport, type ExposureFinding, type RiskLevel } from './analyze.ts'
 import { MirrorStage } from './components/MirrorStage.tsx'
+import { PERSONAS } from './data/personas.ts'
 
 export interface AuthorizedSubject {
   name: string
@@ -44,6 +45,7 @@ const mitigations = [
   { id: 'delay', label: 'Delay live event posts', icon: Clock3 },
   { id: 'routine', label: 'Hide recurring hours', icon: CalendarClock },
   { id: 'metadata', label: 'Remove photo location data', icon: FileImage },
+  { id: 'address', label: 'Redact street address', icon: MapPinned },
 ] as const
 
 function severityName(level: RiskLevel) {
@@ -63,6 +65,7 @@ export default function App() {
   const [activeMitigations, setActiveMitigations] = useState<string[]>([])
   const [notice, setNotice] = useState('')
   const [presenting, setPresenting] = useState(false)
+  const [personaId, setPersonaId] = useState<string | null>('student')
   const fileInput = useRef<HTMLInputElement>(null)
   const previews = useMemo(
     () => files.map(({ file }) => ({ file, url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null })),
@@ -127,13 +130,15 @@ export default function App() {
     }, 700)
   }
 
-  function loadDemo() {
-    setSubjectName('Alex Rivera')
-    setText(SAMPLE_TEXT)
+  function loadDemo(persona = PERSONAS[0] as typeof PERSONAS[number]) {
+    setPersonaId(persona.id)
+    setSubjectName(persona.name)
+    setText(persona.text)
     setFiles([])
-    setReport(analyzeText(SAMPLE_TEXT, true))
+    const nextReport = analyzeText(persona.text, true)
+    setReport(nextReport)
     setActiveMitigations([])
-    setSelectedFinding('route-chain')
+    setSelectedFinding(nextReport.findings[0]?.id ?? null)
     setView('overview')
     setConsentError(false)
     if (fileInput.current) fileInput.current.value = ''
@@ -141,6 +146,7 @@ export default function App() {
   }
 
   function resetWorkspace() {
+    setPersonaId(null)
     setSubjectName('')
     setText('')
     setFiles([])
@@ -214,9 +220,13 @@ export default function App() {
         <div className="page-content">
           <section className="page-heading">
             <div><div className="eyebrow"><span>YOUR DIGITAL FOOTPRINT, RECONSIDERED</span><span className="eyebrow-line" /></div><h1>See yourself from the outside.</h1><p>One post tells a story. Connected traces can reveal a whole routine.</p><p className="subject-context">Authorized subject: <strong>{subjectName || 'Not set'}</strong></p></div>
-            <div className="heading-actions"><span className={`data-badge ${report.isDemo ? 'demo' : ''}`}><i />{report.isDemo ? 'Fictional sample data' : 'Current analysis'}</span><button type="button" className="button-secondary" onClick={loadDemo}><Sparkles size={15} />Load sample</button><button type="button" className="button-icon-label" onClick={resetWorkspace} aria-label="New analysis"><Plus size={17} /><span>New analysis</span></button></div>
+            <div className="heading-actions"><span className={`data-badge ${report.isDemo ? 'demo' : ''}`}><i />{report.isDemo ? 'Fictional sample data' : 'Current analysis'}</span><button type="button" className="button-secondary" onClick={() => loadDemo()}><Sparkles size={15} />Load sample</button><button type="button" className="button-icon-label" onClick={resetWorkspace} aria-label="New analysis"><Plus size={17} /><span>New analysis</span></button></div>
           </section>
 
+          <section className="persona-gallery" aria-label="Fictional case studies">
+            <div className="persona-heading"><span>EXPLORE THE HUMAN SIDE</span><small>4 fictional cases · Real extraction rules</small></div>
+            <div className="persona-cards">{PERSONAS.map((persona, index) => <button type="button" key={persona.id} disabled={isAnalyzing} className={`persona-card ${persona.color} ${personaId === persona.id ? 'chosen' : ''}`} aria-pressed={personaId === persona.id} onClick={() => loadDemo(persona)}><span className="persona-top"><span className="persona-avatar">{persona.initials}</span><span className="persona-case">CASE / 0{index + 1}</span>{personaId === persona.id ? <Check size={14} /> : <ArrowRight size={14} />}</span><strong>{persona.name}</strong><span className="persona-role">{persona.role}</span><p>{persona.description}</p><span className="persona-tag">{persona.tag}</span></button>)}</div>
+          </section>
           <MirrorStage report={report} visibleFindings={visibleFindings} selectedFinding={selectedFinding} onSelect={(id) => { setSelectedFinding(id); setView('overview') }} activeMitigations={activeMitigations} onToggle={toggleMitigation} onCompare={() => setActiveMitigations(activeMitigations.length ? [] : [...new Set(report.findings.flatMap((finding) => finding.mitigation ? [finding.mitigation] : []))])} presenting={presenting} onPresent={() => setPresenting((current) => !current)} />
 
           <section className="metric-strip" aria-label="Analysis summary">
@@ -234,7 +244,7 @@ export default function App() {
                 <div className="subject-fields">
                   <label><span>Authorized name</span><input value={subjectName} onChange={(event) => setSubjectName(event.target.value)} autoComplete="name" placeholder="Your name or synthetic subject" /></label>
                 </div>
-                <textarea aria-label="Text to analyze" value={text} onChange={(event) => { setText(event.target.value); if (report.isDemo) setReport((current) => ({ ...current, isDemo: false })) }} placeholder="Paste posts, schedules, or a bio you are authorized to analyze…" />
+                <textarea aria-label="Text to analyze" value={text} onChange={(event) => { setPersonaId(null); setText(event.target.value); if (report.isDemo) setReport((current) => ({ ...current, isDemo: false })) }} placeholder="Paste posts, schedules, or a bio you are authorized to analyze…" />
                 <input ref={fileInput} className="visually-hidden" type="file" accept="image/*,.md,.txt,.csv,text/*" multiple onChange={(event) => { if (event.target.files) void attachFiles(event.target.files); event.target.value = '' }} />
                 <div className="dropzone" onDragOver={(event) => event.preventDefault()} onDrop={onDrop}>
                   <span className="dropzone-icon"><Upload size={16} /></span><span>Drop files here, or <button type="button" onClick={() => fileInput.current?.click()}>browse files</button></span><small>Images are previewed, not visually analyzed</small>

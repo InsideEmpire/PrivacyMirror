@@ -1,0 +1,8 @@
+import { SAMPLE_TEXT } from '../analyze.ts'
+
+export const PERSONAS = [
+  { id: 'student', name: 'Alex Rivera', initials: 'AR', role: 'The student', tag: 'Routine exposure', color: 'sage', description: 'A campus life, connected by timestamps.', text: SAMPLE_TEXT },
+  { id: 'professional', name: 'Jordan Chen', initials: 'JC', role: 'The professional', tag: 'Workplace + commute', color: 'blue', description: 'An ordinary workday leaves a pattern.', text: `Profile: Product designer at the fictional Lumen Tower office.\nOn weekdays I usually arrive at Lumen Tower around 9 AM.\nI meet colleagues at Cedar Center every week on Tuesdays around 12 PM.\nFriday update: leaving Lumen Tower for a meetup at Ember Hall at 6 PM.` },
+  { id: 'creator', name: 'Morgan Ellis', initials: 'ME', role: 'The creator', tag: 'Address disclosure', color: 'peach', description: 'A collaboration post reveals too much.', text: `Profile: Independent creator. All names and addresses in this case are fictional.\nFor collaboration packages, my delivery address is 42 Example Lane, Unit 5, Fictional City.\nI usually record at Prism Building every week on Monday at 10 AM.\nLaunch meetup at Aurora Hall on Friday at 7 PM.\nMy photo export may retain location data.` },
+  { id: 'runner', name: 'Sam Taylor', initials: 'ST', role: 'The runner', tag: 'Recurring activity', color: 'lavender', description: 'Repeated check-ins reveal a weekly rhythm.', text: `Profile: Weekend runner in a fictional town.\nI usually start at Willow Center every week on Saturday at 6 AM.\nAfter running, I stop at Finch Hall around 7 AM on Saturdays.\nSunday recovery session at Willow Center at 8 AM.\nRace photos may retain location data.` },
+] as const

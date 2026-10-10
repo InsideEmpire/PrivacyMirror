@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react'
-import { ArrowDown, ArrowRight, Check, Clock3, Expand, FileText, GitBranch, LockKeyhole, RotateCcw, Shield, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowDown, ArrowRight, Check, Clock3, Expand, FileText, GitBranch, LockKeyhole, MapPinned, RotateCcw, Shield, ShieldCheck, Sparkles } from 'lucide-react'
 import type { AnalysisReport, ExposureFinding } from '../analyze.ts'
 import './MirrorStage.css'
 
@@ -19,6 +19,7 @@ const controls = [
   { id: 'delay', label: 'Delay posts', icon: Clock3 },
   { id: 'routine', label: 'Hide routine', icon: Shield },
   { id: 'metadata', label: 'Strip metadata', icon: LockKeyhole },
+  { id: 'address', label: 'Redact address', icon: MapPinned },
 ]
 
 export function MirrorStage({ report, visibleFindings, selectedFinding, activeMitigations, onSelect, onToggle, onCompare, presenting, onPresent }: Props) {
@@ -56,7 +57,7 @@ export function MirrorStage({ report, visibleFindings, selectedFinding, activeMi
           <div className="source-stack">{sources.map((source, index) => <div className={`fragment-node ${links.some((link) => link.sourceIndex === index && link.finding.id === selectedFinding) ? 'connected' : ''}`} key={`${index}-${source}`} style={{ top: sourceY(index) - 19, animationDelay: `${index * 100}ms` }}><span className="fragment-icon"><FileText size={14} /></span><div><small>SOURCE {String(index + 1).padStart(2, '0')}</small><p title={source}>{source}</p></div><i /></div>)}</div>
           <div className="finding-stack">{findings.map((finding, index) => {
             const mitigated = finding.mitigation !== null && activeMitigations.includes(finding.mitigation)
-            return <button type="button" key={finding.id} className={`exposure-node ${finding.level} ${mitigated ? 'mitigated' : ''} ${selectedFinding === finding.id ? 'picked' : ''}`} style={{ top: findingY(index) - 19, animationDelay: `${550 + index * 160}ms` }} aria-pressed={selectedFinding === finding.id} aria-label={`${finding.title}${mitigated ? ', mitigated in simulation' : ''}`} onClick={() => onSelect(finding.id)}><span className="node-pin" /><span className="node-tier">{mitigated ? <><Check size={10} />MITIGATED</> : `${finding.level.toUpperCase()} / INFERENCE`}</span><strong>{finding.title}</strong><ArrowRight className="node-arrow" size={13} /></button>
+            return <button type="button" key={finding.id} className={`exposure-node ${finding.level} ${mitigated ? 'mitigated' : ''} ${selectedFinding === finding.id ? 'picked' : ''}`} style={{ top: findingY(index) - 19, animationDelay: `${550 + index * 160}ms` }} aria-pressed={selectedFinding === finding.id} aria-label={`${finding.title}${mitigated ? ', mitigated in simulation' : ''}`} onClick={() => onSelect(finding.id)}><span className="node-pin" /><span className="node-tier">{mitigated ? <><Check size={10} />MITIGATED</> : `${finding.level.toUpperCase()} / ${finding.id === 'address-disclosure' ? 'EXTRACTED' : 'INFERENCE'}`}</span><strong>{finding.title}</strong><ArrowRight className="node-arrow" size={13} /></button>
           })}</div>
           {!findings.length && <div className="map-empty"><ShieldCheck size={24} /><span>No connected findings yet</span></div>}
         </div> : <div className="map-empty"><Sparkles size={28} /><strong>Your story starts with a source.</strong><span>Load the fictional sample or add authorized text below.</span></div>}

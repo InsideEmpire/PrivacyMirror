@@ -122,3 +122,29 @@
   .presentation-mode .stage-story h2 { font-size: 33px; }
 }
 @media (prefers-reduced-motion: reduce) { .map-wire, .fragment-node, .exposure-node { animation: none; } }
+
+.persona-gallery { margin: 0 0 24px; }
+.persona-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.persona-heading > span { color: #507164; font: 9px ui-monospace, monospace; letter-spacing: .14em; }
+.persona-heading small { color: #697c70; font-size: 10px; }
+.persona-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.persona-card { --persona-color: #dce9cd; padding: 17px; border: 1px solid #dce4da; border-radius: 13px; text-align: left; background: #ffffffa6; cursor: pointer; transition: transform .2s, border-color .2s, box-shadow .2s; }
+.persona-card.blue { --persona-color: #dce8f2; }
+.persona-card.peach { --persona-color: #f1dfcc; }
+.persona-card.lavender { --persona-color: #e5dff0; }
+.persona-card:hover:not(:disabled) { transform: translateY(-3px); border-color: #94b397; box-shadow: 0 7px 20px #193c2810; }
+.persona-card.chosen { border-color: #547d57; background: #fff; box-shadow: inset 0 3px #547d57; }
+.persona-top { display: flex; align-items: center; gap: 9px; margin-bottom: 13px; }
+.persona-avatar { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--persona-color); color: #405c47; font-family: Georgia, serif; font-size: 13px; }
+.persona-case { color: #8a978b; font: 8px ui-monospace, monospace; }
+.persona-top > svg { margin-left: auto; color: #547d57; }
+.persona-card > strong { display: block; font-size: 15px; color: #203b30; }
+.persona-role { display: block; margin-top: 4px; color: #687d6c; font-size: 11px; }
+.persona-card > p { margin: 12px 0; min-height: 32px; color: #6c7e70; font-size: 11px; line-height: 1.6; }
+.persona-tag { display: inline-block; padding: 5px 8px; border-radius: 5px; background: var(--persona-color); color: #405c47; font-size: 9px; }
+.presentation-mode .persona-card { padding: 12px 16px; }
+.presentation-mode .persona-card > p { display: none; }
+.presentation-mode .persona-top { margin-bottom: 8px; }
+.presentation-mode .persona-tag { margin-top: 8px; }
+@media (max-width: 1120px) { .persona-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 580px) { .persona-heading { flex-wrap: wrap; gap: 7px; } .persona-card { padding: 13px; } .persona-case { font-size: 7px; } .persona-cards { gap: 9px; } }

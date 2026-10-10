@@ -8,7 +8,7 @@ export interface ExposureFinding {
   evidence: string
   explanation: string
   action: string
-  mitigation: 'delay' | 'routine' | 'metadata' | null
+  mitigation: 'delay' | 'routine' | 'metadata' | 'address' | null
 }
 
 export interface RouteStop {
@@ -67,6 +67,18 @@ export function analyzeText(text: string, isDemo = false, imageCount = 0): Analy
     return { location, time, evidence }
   })
   const findings: ExposureFinding[] = []
+  const addressPattern = /\b\d{1,5}\s+(?:[A-Za-z][A-Za-z'-]*\s+){1,5}(?:Street|St|Road|Rd|Lane|Ln|Avenue|Ave|Drive|Dr|Boulevard|Blvd)\b(?:,?\s+(?:Unit|Apt|Suite)\s+[A-Za-z0-9-]+)?/i
+  const addressSource = sources.find((source) => addressPattern.test(source))
+  const address = addressSource?.match(addressPattern)?.[0]
+  if (address && addressSource) {
+    findings.push({
+      id: 'address-disclosure', title: 'An explicit street address is exposed', level: 'high',
+      location: address, evidence: addressSource,
+      explanation: 'A street-address-shaped string appears directly in the supplied text. This is extraction, not a guessed home address; ownership, existence, and residential use are not verified.',
+      action: 'Redact the street address and unit number. Use a separate business mailing address or private delivery channel.',
+      mitigation: 'address',
+    })
+  }
 
   if (locations.length >= 2 && route.some((stop) => stop.time !== 'No time specified')) {
     const routeEvidence = route.map((stop) => stop.evidence).filter(Boolean).slice(0, 2)
@@ -135,7 +147,7 @@ export function analyzeText(text: string, isDemo = false, imageCount = 0): Analy
     route,
     recurring,
     findings,
-    summary: sources.length === 0 && imageCount === 0 ? 'Add authorized source material to start your analysis.' : summary,
+    summary: sources.length === 0 && imageCount === 0 ? 'Add authorized source material to start your analysis.' : `${address ? 'An explicit street-address-shaped string was found in the source text. ' : ''}${summary}`,
     imageCount,
   }
 }
