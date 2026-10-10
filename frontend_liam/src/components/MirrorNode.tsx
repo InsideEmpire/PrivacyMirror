@@ -14,8 +14,8 @@ export type MirrorNodeType = Node<MirrorNodeData, 'mirror'>
 export function MirrorNode({ data, selected }: NodeProps<MirrorNodeType>) {
   return (
     <div
-      className={`mirror-node w-[210px] rounded-lg border bg-card px-3 py-2 text-left ${
-        selected ? 'border-ink shadow-sm' : 'border-line'
+      className={`mirror-node w-[210px] rounded-lg border bg-white px-3 py-2 text-left text-[#16140f] ${
+        selected ? 'border-[#16140f] shadow-md' : 'border-[#d9d3c7]'
       }`}
       style={{ borderLeftWidth: 3, borderLeftColor: data.accent }}
     >
@@ -30,8 +30,8 @@ export function MirrorNode({ data, selected }: NodeProps<MirrorNodeType>) {
           </span>
         )}
       </div>
-      <div className="mt-0.5 text-sm font-semibold leading-snug text-ink">{data.title}</div>
-      {data.detail && <p className="mt-0.5 text-[13px] leading-snug text-muted">{data.detail}</p>}
+      <div className="mt-0.5 text-sm font-semibold leading-snug">{data.title}</div>
+      {data.detail && <p className="mt-0.5 text-[13px] leading-snug text-[#3f3a33]">{data.detail}</p>}
       {data.kind !== 'finding' && <Handle type="source" position={Position.Right} isConnectable={false} />}
     </div>
   )

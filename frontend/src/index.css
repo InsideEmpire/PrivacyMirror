@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Segoe UI", system-ui, sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --color-canvas: #f4f1ea;
+  --color-card: #fffcf8;
+  --color-ink: #1c1915;
+  --color-muted: #5e584e;
+  --color-line: #e3dcd0;
+  --color-accent: #143d34;
+  --color-high: #9f1d14;
+  --color-mid: #8a5a00;
+  --color-ok: #0c6b52;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse 70% 40% at 100% -10%, rgba(20, 61, 52, 0.06), transparent 50%),
+    #f4f1ea;
+  color: #1c1915;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: #d7efe4;
+  color: #1c1915;
+}
+
+.mirror-node,
+.story-beat {
+  animation: rise 420ms ease;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.caret {
+  display: inline-block;
+  width: 1px;
+  height: 1.05em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: #143d34;
+  animation: blink 1s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mirror-node,
+  .story-beat,
+  .caret {
+    animation: none;
+  }
+}
+
+.react-flow__controls-button {
+  background: #fffcf8;
+  border-bottom-color: #e3dcd0;
+  fill: #1c1915;
+}
+
+.react-flow__controls-button:hover {
+  background: #f4f1ea;
+}
+
+.react-flow__attribution {
+  background: transparent !important;
+  color: #5e584e !important;
+}
+
+.react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+.react-flow__handle {
+  width: 7px;
+  height: 7px;
+  background: #143d34;
+  border: 0;
+}

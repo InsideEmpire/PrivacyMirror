@@ -2,12 +2,14 @@ import type { DemoData } from '../model.ts'
 
 export const demo: DemoData = {
   persona: 'Alex Rivera',
+  birthDate: '2000-04-12',
   role: 'Fictional design student',
   sources: [
     {
       id: 'src-bio',
       kind: 'Profile',
       label: 'Public bio',
+      modality: 'Language',
       short: 'Café, weekdays 7–11',
       text: 'Weekday mornings I’m at North Campus Café, usually 7–11.',
       columnOrder: 0,
@@ -16,6 +18,7 @@ export const demo: DemoData = {
       id: 'src-event',
       kind: 'Post',
       label: 'Friday plan',
+      modality: 'Language',
       short: 'Fair Friday 1–5, phone away',
       text: 'Tabling at the career fair Friday 1–5 PM. Phone stays in my bag.',
       columnOrder: 1,
@@ -25,6 +28,7 @@ export const demo: DemoData = {
       id: 'src-note',
       kind: 'Post',
       label: 'Weekend note',
+      modality: 'Language',
       short: 'Roommate gone until Sunday',
       text: 'Roommate’s out until Sunday.',
       columnOrder: 2,
@@ -33,9 +37,11 @@ export const demo: DemoData = {
       id: 'src-photo',
       kind: 'Photo',
       label: 'Desk photo',
+      modality: 'Vision',
       short: 'Plant photo, location on',
       text: 'Desk plant is thriving.',
-      hint: 'Location metadata is still on the file. No address is shown.',
+      vision: ['Indoor desk', 'Houseplant', 'No person in frame'],
+      hint: 'Metadata: a location tag is still on the file. It is not turned into an address.',
       columnOrder: 3,
     },
   ],
