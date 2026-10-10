@@ -57,7 +57,7 @@ export function Workspace({ subject, onReset }: { subject: AuthorizedSubject; on
         {scenario.exposure.note}
       </h1>
       <p className="mt-2 text-sm text-muted">
-        Authorized subject · birth date {subject.birthDate} · synthetic sources only · no external lookup
+        Authorized subject · {subject.name} · synthetic sources only · no external lookup
       </p>
 
       <section className="mt-4 flex flex-wrap items-center gap-2">

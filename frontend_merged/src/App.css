@@ -109,7 +109,7 @@ button:disabled { cursor: not-allowed; }
 .panel-title-group p { margin: 4px 0 0; color: #83908e; font-size: 10px; line-height: 1.5; }
 .secure-label { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; color: #738781; font-size: 9px; }
 .input-tabs { display: flex; align-items: center; gap: 15px; min-height: 39px; margin: 0 18px; border-bottom: 1px solid #edf0ec; }
-.subject-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, .42fr); gap: 9px; margin: 12px 18px 0; }
+.subject-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; margin: 12px 18px 0; }
 .subject-fields label { display: grid; gap: 5px; color: #7b8985; font-size: 9px; }
 .subject-fields input { width: 100%; min-height: 32px; padding: 0 9px; border: 1px solid #e4ebe5; border-radius: 5px; color: #3e504d; background: #fbfcfa; font-size: 10px; }
 .subject-fields input:focus { border-color: #9ccabd; outline: 2px solid rgba(31, 139, 122, .1); }

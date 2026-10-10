@@ -1,12 +1,10 @@
 import {
   Activity,
-  ArrowDownRight,
   ArrowRight,
   BadgeCheck,
   Building2,
   CalendarClock,
   Check,
-  ChevronDown,
   CircleHelp,
   Clock3,
   FileImage,
@@ -30,7 +28,6 @@ import { analyzeText, SAMPLE_TEXT, type AnalysisReport, type ExposureFinding, ty
 
 export interface AuthorizedSubject {
   name: string
-  birthDate: string
 }
 
 type WorkspaceView = 'overview' | 'evidence' | 'itinerary'
@@ -54,7 +51,6 @@ function severityName(level: RiskLevel) {
 
 export default function App() {
   const [subjectName, setSubjectName] = useState('Alex Rivera')
-  const [birthDate, setBirthDate] = useState('2000-04-12')
   const [text, setText] = useState(SAMPLE_TEXT)
   const [files, setFiles] = useState<AttachedFile[]>([])
   const [report, setReport] = useState<AnalysisReport>(() => analyzeText(SAMPLE_TEXT, true))
@@ -114,8 +110,8 @@ export default function App() {
       announce('Paste some text or add a supported file first.')
       return
     }
-    if (!subjectName.trim() || !birthDate) {
-      announce('Enter the authorized subject name and birth date first.')
+    if (!subjectName.trim()) {
+      announce('Enter the authorized subject name first.')
       return
     }
     setConsentError(false)
@@ -131,7 +127,6 @@ export default function App() {
 
   function loadDemo() {
     setSubjectName('Alex Rivera')
-    setBirthDate('2000-04-12')
     setText(SAMPLE_TEXT)
     setFiles([])
     setReport(analyzeText(SAMPLE_TEXT, true))
@@ -145,7 +140,6 @@ export default function App() {
 
   function resetWorkspace() {
     setSubjectName('')
-    setBirthDate('')
     setText('')
     setFiles([])
     setReport(analyzeText(''))
@@ -183,12 +177,6 @@ export default function App() {
           <span className="brand-name">privacy<span>mirror</span></span>
         </a>
 
-        <div className="workspace-switcher">
-          <span className="workspace-monogram">L</span>
-          <span className="workspace-copy"><strong>Personal workspace</strong><small>Local privacy audit</small></span>
-          <ChevronDown size={15} />
-        </div>
-
         <p className="nav-caption">WORKSPACE</p>
         <nav className="primary-nav" aria-label="Workspace navigation">
           {(['overview', 'evidence', 'itinerary'] as WorkspaceView[]).map((item) => {
@@ -210,20 +198,19 @@ export default function App() {
         </div>
 
         <div className="sidebar-bottom">
-          <button type="button" className="sidebar-link" onClick={() => announce('Local preview mode: no AI service or external search is connected.')}><CircleHelp size={16} />How it works</button>
-          <div className="account-row"><span className="account-avatar">L</span><span><strong>Liam</strong><small>Local guest</small></span><button type="button" aria-label="Reset workspace" onClick={resetWorkspace}><RotateCcw size={15} /></button></div>
+          <div className="account-row"><span className="account-avatar">P</span><span><strong>PrivacyMirror</strong><small>Demo</small></span><button type="button" aria-label="Reset workspace" onClick={resetWorkspace}><RotateCcw size={15} /></button></div>
         </div>
       </aside>
 
       <main className="main-area" id="workspace">
         <header className="topbar">
           <div className="breadcrumb"><span>Personal workspace</span><span className="breadcrumb-slash">/</span><strong>{viewLabels[view]}</strong></div>
-          <div className="topbar-right"><span className="local-status"><i />Local rules preview</span><button type="button" className="icon-button" title="Privacy and security" onClick={() => announce('Content stays on this page; no AI backend is configured.')}><LockKeyhole size={16} /></button><span className="top-avatar">L</span></div>
+          <div className="topbar-right"><span className="local-status"><i />Local rules preview</span><button type="button" className="icon-button" title="Privacy and security" onClick={() => announce('Content stays on this page; no AI backend is configured.')}><LockKeyhole size={16} /></button><span className="top-avatar">P</span></div>
         </header>
 
         <div className="page-content">
           <section className="page-heading">
-            <div><div className="eyebrow"><span>PRIVACY INTELLIGENCE</span><span className="eyebrow-line" /></div><h1>See how the clues connect.</h1><p>Review how places, times, and digital traces combine in content you are authorized to share.</p><p className="subject-context">Authorized subject: <strong>{subjectName || 'Not set'}</strong>{birthDate && <> · birth date {birthDate}</>}</p></div>
+            <div><div className="eyebrow"><span>PRIVACY INTELLIGENCE</span><span className="eyebrow-line" /></div><h1>See how the clues connect.</h1><p>Review how places, times, and digital traces combine in content you are authorized to share.</p><p className="subject-context">Authorized subject: <strong>{subjectName || 'Not set'}</strong></p></div>
             <div className="heading-actions"><span className={`data-badge ${report.isDemo ? 'demo' : ''}`}><i />{report.isDemo ? 'Fictional sample data' : 'Current analysis'}</span><button type="button" className="button-secondary" onClick={loadDemo}><Sparkles size={15} />Load sample</button><button type="button" className="button-icon-label" onClick={resetWorkspace} aria-label="New analysis"><Plus size={17} /><span>New analysis</span></button></div>
           </section>
 
@@ -241,7 +228,6 @@ export default function App() {
                 <div className="input-tabs"><span className="input-tab active"><FileText size={14} />Text content</span><button type="button" className="input-tab" onClick={() => fileInput.current?.click()}><ImagePlus size={14} />Images / files</button><span className="input-hint">Paste · .md · .txt · .csv · images</span></div>
                 <div className="subject-fields">
                   <label><span>Authorized name</span><input value={subjectName} onChange={(event) => setSubjectName(event.target.value)} autoComplete="name" placeholder="Your name or synthetic subject" /></label>
-                  <label><span>Birth date</span><input type="date" value={birthDate} onChange={(event) => setBirthDate(event.target.value)} autoComplete="bday" /></label>
                 </div>
                 <textarea aria-label="Text to analyze" value={text} onChange={(event) => { setText(event.target.value); if (report.isDemo) setReport((current) => ({ ...current, isDemo: false })) }} placeholder="Paste posts, schedules, or a bio you are authorized to analyze…" />
                 <input ref={fileInput} className="visually-hidden" type="file" accept="image/*,.md,.txt,.csv,text/*" multiple onChange={(event) => { if (event.target.files) void attachFiles(event.target.files); event.target.value = '' }} />
@@ -275,7 +261,7 @@ export default function App() {
                 <div className="risk-counts"><span><i className="count-dot high-dot" />High <b>{visibleFindings.filter((finding) => finding.level === 'high').length}</b></span><span><i className="count-dot medium-dot" />Medium <b>{visibleFindings.filter((finding) => finding.level === 'medium').length}</b></span><span><i className="count-dot low-dot" />Low <b>{visibleFindings.filter((finding) => finding.level === 'low').length}</b></span></div>
               </section>
 
-              <section className="findings-panel panel"><div className="side-panel-heading"><div><span className="overline">PRIORITIZED FINDINGS</span><h2>Risk findings <span>{visibleFindings.length}</span></h2></div><button type="button" className="small-icon-button" title="Sort by severity"><ArrowDownRight size={16} /></button></div>
+              <section className="findings-panel panel"><div className="side-panel-heading"><div><span className="overline">PRIORITIZED FINDINGS</span><h2>Risk findings <span>{visibleFindings.length}</span></h2></div></div>
                 {visibleFindings.map((finding, index) => <FindingCard key={finding.id} finding={finding} index={index} selected={selectedFinding === finding.id} onClick={() => { setSelectedFinding(finding.id); setView('overview') }} />)}
                 {visibleFindings.length === 0 && <div className="empty-findings"><ShieldCheck size={21} /><strong>No open findings in this simulation</strong><span>Turn off a mitigation to restore its related clue.</span></div>}
               </section>

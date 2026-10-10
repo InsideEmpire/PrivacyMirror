@@ -60,7 +60,6 @@ function Field({
 export function Story({ onOpen }: { onOpen: (subject: AuthorizedSubject) => void }) {
   const [consented, setConsented] = useState(false)
   const [subjectName, setSubjectName] = useState(demo.persona)
-  const [birthDate, setBirthDate] = useState(demo.birthDate)
   const [phase, setPhase] = useState<Phase>('idle')
   const [values, setValues] = useState<Record<FieldKey, string>>({ name: '', bio: '', event: '', note: '' })
   const [activeKey, setActiveKey] = useState<FieldKey | null>(null)
@@ -112,9 +111,9 @@ export function Story({ onOpen }: { onOpen: (subject: AuthorizedSubject) => void
       const timer = window.setTimeout(() => setStep((current) => current + 1), 520)
       return () => window.clearTimeout(timer)
     }
-    const timer = window.setTimeout(() => onOpen({ name: subjectName.trim(), birthDate }), 420)
+    const timer = window.setTimeout(() => onOpen({ name: subjectName.trim() }), 420)
     return () => window.clearTimeout(timer)
-  }, [birthDate, onOpen, phase, step, subjectName])
+  }, [onOpen, phase, step, subjectName])
 
   const busy = phase === 'typing' || phase === 'photo' || phase === 'running'
 
@@ -142,16 +141,6 @@ export function Story({ onOpen }: { onOpen: (subject: AuthorizedSubject) => void
                 autoComplete="name"
               />
             </label>
-            <label className="block">
-              <span className="text-[11px] font-semibold tracking-[0.14em] text-accent uppercase">Birth date</span>
-              <input
-                type="date"
-                value={birthDate}
-                onChange={(event) => setBirthDate(event.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-line bg-card px-3 py-2.5 text-sm text-ink outline-none focus:border-accent"
-                autoComplete="bday"
-              />
-            </label>
           </div>
           <label className="mt-6 flex cursor-pointer items-start gap-3 text-sm text-ink">
             <input
@@ -164,7 +153,7 @@ export function Story({ onOpen }: { onOpen: (subject: AuthorizedSubject) => void
           </label>
           <button
             type="button"
-            disabled={!consented || !subjectName.trim() || !birthDate || busy || phase === 'ready'}
+            disabled={!consented || !subjectName.trim() || busy || phase === 'ready'}
             onClick={() => setPhase('typing')}
             className="mt-5 w-full rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-line disabled:text-muted"
           >

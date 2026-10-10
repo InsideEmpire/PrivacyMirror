@@ -2,7 +2,6 @@ import type { DemoData } from '../model.ts'
 
 export const demo: DemoData = {
   persona: 'Alex Rivera',
-  birthDate: '2000-04-12',
   role: 'Fictional design student',
   sources: [
     {
