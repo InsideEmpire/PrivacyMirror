@@ -25,6 +25,7 @@ import {
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import './App.css'
 import { analyzeText, SAMPLE_TEXT, type AnalysisReport, type ExposureFinding, type RiskLevel } from './analyze.ts'
+import { MirrorStage } from './components/MirrorStage.tsx'
 
 export interface AuthorizedSubject {
   name: string
@@ -61,6 +62,7 @@ export default function App() {
   const [selectedFinding, setSelectedFinding] = useState<string | null>('route-chain')
   const [activeMitigations, setActiveMitigations] = useState<string[]>([])
   const [notice, setNotice] = useState('')
+  const [presenting, setPresenting] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
   const previews = useMemo(
     () => files.map(({ file }) => ({ file, url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null })),
@@ -170,7 +172,7 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${presenting ? 'presentation-mode' : ''}`}>
       <aside className="sidebar">
         <a className="brand" href="#workspace" aria-label="PrivacyMirror workspace">
           <span className="brand-mark"><Shield size={19} strokeWidth={2.2} /></span>
@@ -196,6 +198,7 @@ export default function App() {
           <div><strong>Authorized content only</strong><p>Files stay in this browser session</p></div>
           <BadgeCheck className="session-check" size={15} />
         </div>
+        <div className="sidebar-manifesto"><span>THE PRIVACY PARADOX</span><p>Small traces.<br />Bigger picture.</p><small>Understand what your content reveals when the pieces come together.</small></div>
 
         <div className="sidebar-bottom">
           <div className="account-row"><span className="account-avatar">P</span><span><strong>PrivacyMirror</strong><small>Demo</small></span><button type="button" aria-label="Reset workspace" onClick={resetWorkspace}><RotateCcw size={15} /></button></div>
@@ -210,9 +213,11 @@ export default function App() {
 
         <div className="page-content">
           <section className="page-heading">
-            <div><div className="eyebrow"><span>PRIVACY INTELLIGENCE</span><span className="eyebrow-line" /></div><h1>See how the clues connect.</h1><p>Review how places, times, and digital traces combine in content you are authorized to share.</p><p className="subject-context">Authorized subject: <strong>{subjectName || 'Not set'}</strong></p></div>
+            <div><div className="eyebrow"><span>YOUR DIGITAL FOOTPRINT, RECONSIDERED</span><span className="eyebrow-line" /></div><h1>See yourself from the outside.</h1><p>One post tells a story. Connected traces can reveal a whole routine.</p><p className="subject-context">Authorized subject: <strong>{subjectName || 'Not set'}</strong></p></div>
             <div className="heading-actions"><span className={`data-badge ${report.isDemo ? 'demo' : ''}`}><i />{report.isDemo ? 'Fictional sample data' : 'Current analysis'}</span><button type="button" className="button-secondary" onClick={loadDemo}><Sparkles size={15} />Load sample</button><button type="button" className="button-icon-label" onClick={resetWorkspace} aria-label="New analysis"><Plus size={17} /><span>New analysis</span></button></div>
           </section>
+
+          <MirrorStage report={report} visibleFindings={visibleFindings} selectedFinding={selectedFinding} onSelect={(id) => { setSelectedFinding(id); setView('overview') }} activeMitigations={activeMitigations} onToggle={toggleMitigation} onCompare={() => setActiveMitigations(activeMitigations.length ? [] : [...new Set(report.findings.flatMap((finding) => finding.mitigation ? [finding.mitigation] : []))])} presenting={presenting} onPresent={() => setPresenting((current) => !current)} />
 
           <section className="metric-strip" aria-label="Analysis summary">
             <div className="metric-cell"><span className="metric-icon teal"><FileText size={17} /></span><div><small>Sources added</small><strong>{report.sourceCount.toString().padStart(2, '0')} <em>items</em></strong></div></div>
@@ -244,7 +249,7 @@ export default function App() {
 
               <section className="results-panel panel">
                 <div className="results-header"><div className="panel-title-group"><span className="step-index">02</span><div><h2>Analysis results</h2><p>Each finding links to its source text; routes are possible scenarios only.</p></div></div><div className="view-switch" role="tablist" aria-label="Analysis views">{(['overview', 'evidence', 'itinerary'] as WorkspaceView[]).map((item) => <button key={item} type="button" role="tab" aria-selected={view === item} className={view === item ? 'selected' : ''} onClick={() => setView(item)}>{viewLabels[item]}</button>)}</div></div>
-                {view === 'overview' && <Overview report={report} visibleFindings={visibleFindings} onSelect={setSelectedFinding} selectedFinding={selectedFinding} />}
+                {view === 'overview' && <Overview report={report} visibleFindings={visibleFindings} onSelect={setSelectedFinding} selectedFinding={selectedFinding} onEvidence={() => setView('evidence')} />}
                 {view === 'evidence' && <EvidenceView report={report} onSelectView={() => setView('overview')} />}
                 {view === 'itinerary' && <ItineraryView report={report} />}
               </section>
@@ -255,7 +260,7 @@ export default function App() {
 
             <aside className="insight-column">
               <section className={`risk-summary panel risk-${overallLevel}`}>
-                <div className="risk-summary-top"><div><span className="overline">EXPOSURE LEVEL</span><h2>{overallLevel === 'high' ? 'Needs attention first' : overallLevel === 'medium' ? 'Exposure can be reduced' : 'No clear combination found'}</h2></div><span className={`risk-emblem ${overallLevel}`}><ShieldAlert size={21} /></span></div>
+                <div className="risk-summary-top"><div><span className="overline">EXPOSURE LEVEL</span><h2>{overallLevel === 'high' ? 'Needs attention first' : overallLevel === 'medium' ? 'Exposure can be reduced' : activeMitigations.length ? 'No open findings in simulation' : 'No clear combination found'}</h2></div><span className={`risk-emblem ${overallLevel}`}><ShieldAlert size={21} /></span></div>
                 <p>Qualitative tiers reflect the supplied clues, not a calibrated personal risk score.</p>
                 <div className="risk-meter" aria-label={`Current risk: ${severityName(overallLevel)}`}><i className={overallLevel} /></div><div className="risk-meter-labels"><span>Low</span><span>Medium</span><span>High</span></div>
                 <div className="risk-counts"><span><i className="count-dot high-dot" />High <b>{visibleFindings.filter((finding) => finding.level === 'high').length}</b></span><span><i className="count-dot medium-dot" />Medium <b>{visibleFindings.filter((finding) => finding.level === 'medium').length}</b></span><span><i className="count-dot low-dot" />Low <b>{visibleFindings.filter((finding) => finding.level === 'low').length}</b></span></div>
@@ -263,7 +268,7 @@ export default function App() {
 
               <section className="findings-panel panel"><div className="side-panel-heading"><div><span className="overline">PRIORITIZED FINDINGS</span><h2>Risk findings <span>{visibleFindings.length}</span></h2></div></div>
                 {visibleFindings.map((finding, index) => <FindingCard key={finding.id} finding={finding} index={index} selected={selectedFinding === finding.id} onClick={() => { setSelectedFinding(finding.id); setView('overview') }} />)}
-                {visibleFindings.length === 0 && <div className="empty-findings"><ShieldCheck size={21} /><strong>No open findings in this simulation</strong><span>Turn off a mitigation to restore its related clue.</span></div>}
+                {visibleFindings.length === 0 && <div className="empty-findings"><ShieldCheck size={21} /><strong>{report.findings.length ? 'No open findings in this simulation' : 'No analysis yet'}</strong><span>{report.findings.length ? 'Turn off a mitigation to restore its related clue.' : 'Add your material to reveal connected clues.'}</span></div>}
               </section>
 
               <section className="mitigation-panel panel"><div className="side-panel-heading"><div><span className="overline">WHAT-IF SIMULATION</span><h2>Mitigation simulation</h2></div><span className="simulation-tag">SIMULATED</span></div><p>Toggle a change to see how findings respond.</p><div className="mitigation-list">{mitigations.map(({ id, label, icon: Icon }) => { const active = activeMitigations.includes(id); const exists = report.findings.some((finding) => finding.mitigation === id); return <button key={id} type="button" disabled={!exists} aria-pressed={active} className={`mitigation-option ${active ? 'on' : ''} ${!exists ? 'unavailable' : ''}`} onClick={() => toggleMitigation(id)}><span className="mitigation-icon"><Icon size={15} /></span><span>{label}<small>{active ? 'Enabled in simulation' : exists ? 'Click to preview change' : 'No related clue found'}</small></span><span className="toggle"><i /></span></button> })}</div><div className="simulation-foot"><i />Changes this view only; original content stays untouched</div></section>
@@ -282,12 +287,12 @@ function FindingCard({ finding, index, selected, onClick }: { finding: ExposureF
   return <button type="button" className={`finding-card ${selected ? 'selected' : ''}`} onClick={onClick}><span className={`finding-marker ${finding.level}`}>{String(index + 1).padStart(2, '0')}</span><span className="finding-copy"><span className="finding-title">{finding.title}</span><span className="finding-meta"><i className={finding.level} />{severityName(finding.level)}<b>·</b>{finding.location}</span></span><ArrowRight size={15} className="finding-arrow" /></button>
 }
 
-function Overview({ report, visibleFindings, onSelect, selectedFinding }: { report: AnalysisReport; visibleFindings: ExposureFinding[]; onSelect: (id: string) => void; selectedFinding: string | null }) {
+function Overview({ report, visibleFindings, onSelect, selectedFinding, onEvidence }: { report: AnalysisReport; visibleFindings: ExposureFinding[]; onSelect: (id: string) => void; selectedFinding: string | null; onEvidence: () => void }) {
   const selected = visibleFindings.find((finding) => finding.id === selectedFinding) ?? visibleFindings[0]
   return <div className="overview-content"><div className="overview-topline"><span className="result-chip"><span />{report.isDemo ? 'Synthetic sample analysis' : 'Current analysis'}</span><span className="analysis-method"><Sparkles size={13} />Local keyword rules · Not an AI conclusion</span></div>
     <div className="overview-summary"><div className="summary-symbol"><Activity size={21} /></div><div><span className="overline">EXECUTIVE SUMMARY</span><p>{report.summary}</p></div></div>
-    {selected ? <article className={`selected-finding ${selected.level}`}><div className="selected-finding-head"><span className={`severity-pill ${selected.level}`}><i />{severityName(selected.level)} risk</span><span className="finding-id">FINDING / {selected.id.toUpperCase()}</span></div><h3>{selected.title}</h3><p className="finding-explanation">{selected.explanation}</p><div className="finding-location"><MapPinned size={15} /><span>{selected.location}</span><span className="location-source-label">Mentioned in text</span></div>{selected.evidence && <blockquote><span>Source excerpt</span><p>“{selected.evidence}”</p></blockquote>}<div className="action-row"><span className="action-check"><Check size={13} /></span><span><b>Suggested action</b>{selected.action}</span><button type="button" onClick={() => onSelect(selected.id)} aria-label="View risk finding"><ArrowRight size={15} /></button></div></article> : <div className="empty-state"><ShieldCheck size={24} /><h3>All available mitigations are enabled</h3><p>Findings are hidden in this simulation view.</p></div>}
-    <div className="overview-bottom"><div className="bottom-stat"><span>Source snippets</span><strong>{report.sourceSnippets.length}</strong></div><div className="bottom-stat"><span>Place mentions</span><strong>{report.locations.length}</strong></div><div className="bottom-stat"><span>Future route</span><strong>{report.recurring && report.route.length > 1 ? 'Scenario only' : 'Insufficient clues'}</strong></div><button type="button" onClick={() => onSelect(selected?.id ?? '')}>Open evidence chain<ArrowRight size={14} /></button></div>
+    {selected ? <article className={`selected-finding ${selected.level}`}><div className="selected-finding-head"><span className={`severity-pill ${selected.level}`}><i />{severityName(selected.level)} risk</span><span className="finding-id">FINDING / {selected.id.toUpperCase()}</span></div><h3>{selected.title}</h3><p className="finding-explanation">{selected.explanation}</p><div className="finding-location"><MapPinned size={15} /><span>{selected.location}</span><span className="location-source-label">Mentioned in text</span></div>{selected.evidence && <blockquote><span>Source excerpt</span><p>“{selected.evidence}”</p></blockquote>}<div className="action-row"><span className="action-check"><Check size={13} /></span><span><b>Suggested action</b>{selected.action}</span><button type="button" onClick={() => onSelect(selected.id)} aria-label="View risk finding"><ArrowRight size={15} /></button></div></article> : <div className="empty-state"><ShieldCheck size={24} /><h3>{report.findings.length ? 'All available mitigations are enabled' : 'Your mirror is ready'}</h3><p>{report.findings.length ? 'Findings are hidden in this simulation view.' : 'Add authorized text or load the fictional sample to begin.'}</p></div>}
+    <div className="overview-bottom"><div className="bottom-stat"><span>Source snippets</span><strong>{report.sourceSnippets.length}</strong></div><div className="bottom-stat"><span>Place mentions</span><strong>{report.locations.length}</strong></div><div className="bottom-stat"><span>Future route</span><strong>{report.recurring && report.route.length > 1 ? 'Scenario only' : 'Insufficient clues'}</strong></div><button type="button" onClick={onEvidence}>Open evidence chain<ArrowRight size={14} /></button></div>
   </div>
 }
 
