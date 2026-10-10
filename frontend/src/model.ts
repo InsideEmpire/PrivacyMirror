@@ -25,6 +25,8 @@ export interface DemoSource {
   label: string
   text: string
   short: string
+  modality: 'Language' | 'Vision'
+  vision?: string[]
   hint?: string
   columnOrder: number
   hiddenBy?: MitigationId[]
@@ -139,21 +141,21 @@ export function exposureFor(findings: DemoFinding[]): Exposure {
     return {
       level: 'elevated',
       label: 'Elevated',
-      note: 'Friday away window is still showing.',
+      note: 'Friday, 1–5. Alex is away, phone in the bag, roommate gone.',
     }
   }
   if (findings.length > 1) {
     return {
       level: 'narrowed',
       label: 'Narrowed',
-      note: 'Away window removed.',
+      note: 'The Friday story breaks. The photo still has a location tag.',
     }
   }
   if (findings.length === 1) {
     return {
       level: 'residual',
       label: 'Residual',
-      note: 'Only the café routine is left.',
+      note: 'Only the weekday café habit is still public.',
     }
   }
   return {

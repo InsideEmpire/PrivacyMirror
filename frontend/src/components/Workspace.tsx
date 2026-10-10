@@ -11,10 +11,10 @@ function initialStage() {
 }
 
 const exposureClass = {
-  elevated: 'bg-[#fde8e6] text-high',
-  narrowed: 'bg-[#fff4d6] text-mid',
-  residual: 'bg-[#e5f6f0] text-ok',
-  reduced: 'bg-[#e5f6f0] text-ok',
+  elevated: 'text-high',
+  narrowed: 'text-mid',
+  residual: 'text-ok',
+  reduced: 'text-ok',
 } as const
 
 export function Workspace({ onReset }: { onReset: () => void }) {
@@ -38,22 +38,25 @@ export function Workspace({ onReset }: { onReset: () => void }) {
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-3 sm:px-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <p className="text-sm font-semibold text-ink">PrivacyMirror</p>
-          <h1 className="text-sm text-muted">{demo.persona} · fictional · no web search</h1>
-        </div>
+      <header className="flex items-start justify-between gap-4">
+        <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+          PrivacyMirror · Case 014 · {demo.persona}
+        </p>
         <button
           type="button"
           onClick={onReset}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink"
+          className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-muted hover:text-ink"
         >
           <RotateCcw size={14} />
           Start over
         </button>
       </header>
 
-      <section className="mt-3 flex flex-wrap items-center gap-2">
+      <h1 className="mt-3 max-w-4xl font-serif text-3xl leading-tight text-ink sm:text-4xl" aria-live="polite">
+        {scenario.exposure.note}
+      </h1>
+
+      <section className="mt-4 flex flex-wrap items-center gap-2">
         {MITIGATIONS.map((mitigation) => {
           const on = enabled.includes(mitigation.id)
           return (
@@ -63,20 +66,14 @@ export function Workspace({ onReset }: { onReset: () => void }) {
               aria-pressed={on}
               onClick={() => toggle(mitigation.id)}
               className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
-                on ? 'border-ink bg-ink text-white' : 'border-line bg-card text-ink hover:border-ink'
+                on ? 'border-accent bg-accent text-white' : 'border-line bg-card text-ink hover:border-accent'
               }`}
             >
               {mitigation.title}
             </button>
           )
         })}
-        <p
-          className={`rounded-full px-3 py-1.5 text-sm font-semibold ${exposureClass[scenario.exposure.level]}`}
-          aria-live="polite"
-        >
-          {scenario.exposure.label}
-          <span className="ml-2 font-medium">{scenario.exposure.note}</span>
-        </p>
+        <p className={`text-sm font-semibold ${exposureClass[scenario.exposure.level]}`}>{scenario.exposure.label}</p>
       </section>
 
       <div className="mt-3 grid flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">

@@ -18,7 +18,7 @@ export function Inspector({
   const findings = [...scenario.findings].sort((a, b) => a.listOrder - b.listOrder)
 
   return (
-    <aside className="flex max-h-[520px] flex-col overflow-hidden rounded-xl border border-line bg-card lg:max-h-[calc(100vh-132px)] lg:min-h-[520px]">
+    <aside className="flex max-h-[480px] flex-col overflow-hidden rounded-2xl border border-line bg-card lg:max-h-[calc(100vh-220px)] lg:min-h-[480px]">
       <div className="border-b border-line px-4 py-3">
         <h2 className="text-sm font-semibold text-ink">Evidence</h2>
       </div>
@@ -66,6 +66,13 @@ function SelectionDetail({ selectedId, scenario }: { selectedId: string | null; 
           {source.kind} · {source.label}
         </p>
         <blockquote className="mt-2 border-l-2 border-ink pl-3 text-sm leading-relaxed text-ink">{source.text}</blockquote>
+        {source.vision && source.vision.length > 0 && (
+          <ul className="mt-3 space-y-1 text-sm text-ink">
+            {source.vision.map((line) => (
+              <li key={line}>Vision · {line}</li>
+            ))}
+          </ul>
+        )}
         {(metadataOff || source.hint) && (
           <p className="mt-2 text-sm text-muted">
             {metadataOff ? 'Location metadata removed. Caption stays.' : source.hint}

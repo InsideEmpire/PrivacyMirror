@@ -125,7 +125,7 @@ export function ExposureGraph({
     .filter((edge) => visibleIds.has(edge.source) && visibleIds.has(edge.target))
     .map((edge) => {
       const related = selectedId !== null && (edge.source === selectedId || edge.target === selectedId)
-      const color = related ? '#1a1814' : '#6d675e'
+      const color = related ? '#143d34' : '#8a8175'
       return {
         id: `${edge.source}-${edge.target}`,
         source: edge.source,
@@ -140,7 +140,7 @@ export function ExposureGraph({
   const signature = `${stage}:${nodes.map((node) => node.id).join(',')}`
 
   return (
-    <div className="h-[520px] overflow-hidden rounded-xl border border-line bg-[#e7e2d6] lg:h-[calc(100vh-132px)] lg:min-h-[520px]">
+    <div className="h-[480px] overflow-hidden rounded-2xl border border-line bg-[#f7f4ee] shadow-sm lg:h-[calc(100vh-220px)] lg:min-h-[480px]">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -156,7 +156,7 @@ export function ExposureGraph({
         elementsSelectable
         proOptions={{ hideAttribution: false }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={22} size={1.1} color="#c9c1b2" />
+        <Background variant={BackgroundVariant.Dots} gap={22} size={1.1} color="#ddd4c6" />
         <Controls showInteractive={false} />
         <FitView signature={signature} />
         <Panel position="top-left">
